@@ -49,3 +49,37 @@ x_train_ne=np.c_[np.ones((len(x_train),1)),x_train]
 x_test_ne=np.c_[np.ones((len(x_test),1)),x_test]
 theta=np.linalg.inv(x_train_ne.T @ x_train_ne) @ x_train_ne.T @ y_train
 y_pred_ne=x_test_ne @ theta
+
+
+
+idx = np.argsort(x_test.flatten())
+
+
+x_sorted = x_test.flatten()[idx]
+y_test_sorted = y_test[idx]
+y_pred_gd_sorted = y_pred_gd[idx]
+y_pred_ne_sorted = y_pred_ne[idx]
+
+plt.figure(figsize=(12,5))
+
+plt.subplot(1,2,1)
+plt.scatter(x_test, y_test, color='blue', alpha=0.5, label='Actual Data')
+plt.plot(x_sorted, y_pred_gd_sorted, color='red', linewidth=2,
+         label='Gradient Descent')
+plt.xlabel("Average Rooms")
+plt.ylabel("House Price")
+plt.title("Gradient Descent Regression")
+plt.legend()
+
+
+plt.subplot(1,2,2)
+plt.scatter(x_test, y_test, color='blue', alpha=0.5, label='Actual Data')
+plt.plot(x_sorted, y_pred_ne_sorted, color='green', linewidth=2,
+         label='Normal Equation')
+plt.xlabel("Average Rooms")
+plt.ylabel("House Price")
+plt.title("Normal Equation Regression")
+plt.legend()
+
+plt.tight_layout()
+plt.show()
