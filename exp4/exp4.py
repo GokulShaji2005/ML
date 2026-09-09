@@ -29,6 +29,10 @@ mnb=MultinomialNB()
 mnb.fit(X_train,y_train)
 y_pred_mnb=mnb.predict(X_test)
 
+binary_vectorizer=CountVectorizer(stop_words="english",min_df=2,binary=True)
+X_train_binary=binary_vectorizer.fit_transform(X_train_text)
+X_test_binary=binary_vectorizer.transform(X_test_text)
+
 bnb=BernoulliNB()
 bnb.fit(X_train_binary,y_train)
 y_pred_bnb=bnb.predict(X_test_binary)
