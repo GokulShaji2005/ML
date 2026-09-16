@@ -1,0 +1,7 @@
+implement the k nearest neighbours algorithm for image classification using the fashion mnist dataset. Experiment with different values of K and analyse their impact on model p performance
+
+Tasks:
+load and preprocess the fashion mnist dataset.
+Implement KNN for multi-class classification.
+Experiment with different values of K and evaluate performance.
+Discuss the impact of different K values on model accuracy and computational efficiency.
