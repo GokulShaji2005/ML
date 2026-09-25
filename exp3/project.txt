@@ -1,0 +1,293 @@
+Team 03 – Decision Threshold: Project Context
+
+We are working on a machine-learning experiment using the Breast Cancer Wisconsin dataset available through sklearn.datasets.load_breast_cancer().
+
+Our team is investigating classification thresholds in logistic regression.
+
+Research Question
+
+How does changing the classification threshold affect model behaviour?
+
+We specifically need to investigate how changing the threshold affects:
+
+predictions;
+
+false positives (FP);
+
+false negatives (FN);
+
+precision;
+
+recall;
+
+F1-score.
+
+The minimum project requirement is to investigate at least four different threshold values and explain the observed trade-off.
+
+Dataset and Model
+
+We load the breast cancer dataset:
+
+from sklearn.datasets import load_breast_cancer
+
+data = load_breast_cancer()
+
+X = data.data
+y = data.target
+
+
+The dataset has:
+
+569 samples
+30 features
+2 classes: 0 and 1
+
+
+We split the data into training and testing sets using:
+
+train_test_split(
+    X,
+    y,
+    test_size=0.2,
+    random_state=42,
+    stratify=y
+)
+
+
+The features are standardized using StandardScaler.
+
+We then train a logistic regression model.
+
+Our current model is:
+
+model = LogisticRegression(
+    penalty=None,
+    max_iter=5000,
+    random_state=42
+)
+
+model.fit(X_train, y_train)
+
+
+The original code also experimented with L1 and L2 regularization, but our current Team 03 investigation is not about comparing L1 and L2. The focus is specifically on the classification decision threshold.
+
+Important Distinction: Regularization vs Classification Threshold
+
+We initially had L1 and L2 logistic regression models in the code and were confused about whether the threshold should replace L1/L2.
+
+We now understand that these are different concepts.
+
+L1/L2 regularization
+
+L1 and L2 affect the training process and model coefficients.
+
+L1 adds a penalty based on the absolute coefficient values.
+
+L2 adds a penalty based on squared coefficient values.
+
+L1 can make coefficients exactly zero.
+
+L2 generally shrinks coefficients without making them exactly zero.
+
+These are not the classification thresholds we are investigating.
+
+Classification threshold
+
+Logistic regression produces a probability for class 1:
+
+y_prob = model.predict_proba(X_test)[:, 1]
+
+
+A classification threshold converts that probability into a class prediction.
+
+For example:
+
+y_pred = (y_prob >= 0.5).astype(int)
+
+
+means:
+
+Probability >= 0.5 → Class 1
+Probability < 0.5  → Class 0
+
+
+The default predict() behaviour effectively uses the 0.5 decision threshold for binary logistic regression, but we want to explicitly control the threshold for our experiment.
+
+Current Problem
+
+We changed the code so that it explicitly tests several thresholds:
+
+thresholds = [0.3, 0.4, 0.5, 0.6, 0.7]
+
+
+For each threshold we calculate:
+
+accuracy;
+
+precision;
+
+recall;
+
+F1-score;
+
+false positives;
+
+false negatives;
+
+confusion matrix.
+
+The relevant code is:
+
+y_prob = model.predict_proba(X_test)[:, 1]
+
+for threshold in thresholds:
+
+    y_pred = (y_prob >= threshold).astype(int)
+
+    tn, fp, fn, tp = confusion_matrix(
+        y_test,
+        y_pred
+    ).ravel()
+
+    precision = precision_score(y_test, y_pred)
+    recall = recall_score(y_test, y_pred)
+    f1 = f1_score(y_test, y_pred)
+
+Unexpected Result
+
+When we tested:
+
+0.3
+0.4
+0.5
+0.6
+0.7
+
+
+we obtained exactly the same results for every threshold.
+
+The output was:
+
+Threshold    Accuracy    Precision    Recall      F1        FP    FN
+
+0.3          0.921053    0.970149     0.902778    0.935252   2     7
+0.4          0.921053    0.970149     0.902778    0.935252   2     7
+0.5          0.921053    0.970149     0.902778    0.935252   2     7
+0.6          0.921053    0.970149     0.902778    0.935252   2     7
+0.7          0.921053    0.970149     0.902778    0.935252   2     7
+
+
+The confusion matrix was identical for every threshold:
+
+[[40  2]
+ [ 7 65]]
+
+
+Therefore:
+
+False Positives = 2
+False Negatives = 7
+
+
+for every tested threshold.
+
+What We Need to Understand
+
+We suspect this happens because the model's predicted probabilities may be concentrated mostly near 0 and 1.
+
+For example, if the model predicts probabilities such as:
+
+0.001
+0.003
+0.02
+...
+0.97
+0.99
+0.999
+
+
+then thresholds of 0.3, 0.4, 0.5, 0.6 and 0.7 may all produce the exact same classifications.
+
+However, we do not want to assume this without examining the actual probabilities.
+
+We therefore want to inspect:
+
+print("Minimum:", np.min(y_prob))
+print("Maximum:", np.max(y_prob))
+print("Mean:", np.mean(y_prob))
+print(np.sort(y_prob))
+
+
+We can also inspect probabilities close to the threshold region:
+
+near_threshold = y_prob[
+    (y_prob >= 0.1) &
+    (y_prob <= 0.9)
+]
+
+print(np.sort(near_threshold))
+
+
+Another useful check is to find probabilities closest to 0.5:
+
+closest = np.argsort(np.abs(y_prob - 0.5))[:20]
+
+print(y_prob[closest])
+
+Main Goal
+
+We need to determine how to conduct a meaningful classification-threshold experiment that satisfies the Team 03 research question.
+
+We should not arbitrarily choose threshold values simply because they are common values.
+
+Instead, we want to:
+
+Understand the distribution of the model's predicted probabilities.
+
+Determine why 0.3–0.7 produced identical predictions.
+
+Select meaningful threshold values that demonstrate changes in predictions, if possible.
+
+Compare FP, FN, precision, recall and F1-score across thresholds.
+
+Explain the trade-off clearly.
+
+Produce suitable tables and graphs for the project report.
+
+Avoid confusing classification threshold with L1/L2 regularization.
+
+The central concept we need to demonstrate is:
+
+Lower classification threshold
+        ↓
+More cases classified as positive
+        ↓
+Usually fewer false negatives
+        ↓
+Usually more false positives
+        ↓
+Recall tends to increase
+Precision may decrease
+
+
+Higher classification threshold
+        ↓
+Fewer cases classified as positive
+        ↓
+Usually fewer false positives
+        ↓
+Usually more false negatives
+        ↓
+Precision may increase
+Recall may decrease
+
+
+These are expected tendencies, but the actual results should be calculated from our test set rather than assumed.
+
+Current Research Focus
+
+The final experiment should answer:
+
+"How does changing the classification threshold affect model behaviour in terms of predictions, false positives, false negatives, precision, recall, and F1-score?"
+
+We need help interpreting the identical results we obtained and determining the most appropriate way to select threshold values for this particular dataset/model so that the experiment demonstrates the threshold trade-off clearly and correctly.
