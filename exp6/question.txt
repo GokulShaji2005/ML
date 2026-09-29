@@ -1,0 +1,7 @@
+Implement A DECISION Tree classifier using the id3 algorithm to segment customers based on their purchasing behaviour using the online retail dataset.Analyz the tree structure and discus the important feature
+
+Tasks:
+Load and preprocess the online retail dataset
+Implement Decision Tree using the id3 algorithm
+Visualize the decision tree and analyze feature importance 
+Discuss how the tree structure helps in understanding the customer behaviour
